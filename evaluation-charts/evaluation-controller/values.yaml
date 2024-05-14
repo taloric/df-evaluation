@@ -1,0 +1,108 @@
+global:
+  mysql:
+    password: "deepflow"
+    db: "evaluation"
+  redis:
+    password: "root"
+    db: "0"
+  podAntiAffinityLabelSelector: []
+  podAntiAffinityTermLabelSelector: []
+  podAffinityLabelSelector: []
+  podAffinityTermLabelSelector: []
+  nodeAffinityLabelSelector: []
+  nodeAffinityTermLabelSelector: []
+
+image:
+  repository: hub.deepflow.yunshan.net/public/eval-controller
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+replicas: 1
+
+hostNetwork: "false"
+dnsPolicy: ClusterFirst
+nameservers: 
+- 114.114.114.114
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+allInOneLocalStorage: "false"
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: NodePort
+  ports:
+  - name: tcp
+    port: 10083
+    targetPort: 10083
+    nodePort: 
+    protocol: TCP
+
+controllerConfig:
+  listen_port: 10083 # HTTP Listen Port
+  log_dir: /var/log/evalutation # log dir
+  runner_data_dir: /var/evaluation # runner data dir
+  local_host_ip: ""
+  agent-tools:
+    type: deepflow
+    deepflow:
+      # agent_type: k8s / workload
+      agent_type: k8s
+      k8s_type_params:
+        vpc_name: "infrastructure"
+        domain_name: "aliyun"
+      server_ip: "10.1.19.32"
+      server_ssh_port: 22
+      server_ssh_username: root
+      server_ssh_password: Yunshan3302!
+      version: latest
+      config:
+        max_cpus: 1
+        max_memory: 1024
+  platform-tools:
+    type: aliyun
+    aliyun:
+      access_key: 
+      secret_key: 
+      region:
+  mysql:
+    host: "{{ $.Release.Name }}-mysql"
+    port: 30130
+    user: root
+    password: "{{ $.Values.global.mysql.password }}"
+    db: "{{ $.Values.global.mysql.db }}"
+  redis:
+    host: "{{ $.Release.Name }}-redis"
+    port: 6379
+    password: "{{ $.Values.global.redis.password }}"
+    db: "{{ $.Values.global.redis.db }}"
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

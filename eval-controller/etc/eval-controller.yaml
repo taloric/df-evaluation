@@ -1,0 +1,43 @@
+listen_port: 10083 # HTTP Listen Port
+log_dir: /var/log/evalutation # log dir
+runner_data_dir: /var/evaluation # runner data dir
+local_host_ip: ""
+max_runner_num: 3
+
+agent-tools:
+  type: deepflow
+  deepflow:
+    # agent_type: k8s / workload
+    agent_type: k8s
+    k8s_type_params:
+      vpc_name: "infrastructure"
+      domain_name: "aliyun"
+
+    server_ip:
+    server_ssh_port:
+    server_ssh_username:
+    server_ssh_password:
+    version:
+    config:
+      max_cpus: 1
+      max_memory: 1024
+
+platform-tools:
+  type: aliyun
+  aliyun:
+    access_key:
+    secret_key:
+    region:
+
+mysql:
+  host:
+  port:
+  user:
+  password:
+  db:
+
+redis:
+  host:
+  port:
+  password:
+  db:

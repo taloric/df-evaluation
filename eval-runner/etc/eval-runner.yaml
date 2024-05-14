@@ -1,0 +1,43 @@
+listen_port: 10083 # HTTP Listen Port
+case_params:
+  uuid: 
+  case_name: 
+  process_num: 1 
+runner_data_dir: ""
+agent-tools:
+  type: deepflow
+  deepflow:
+    # agent_type: k8s / workload
+    agent_type: workload
+    k8s_type_params:
+      vpc_name: "infrastructure"
+      domain_name: "aliyun"
+
+    server_ip: "10.1.19.32"
+    server_ssh_port: 22
+    server_ssh_username: root
+    server_ssh_password: Yunshan3302!
+    version: latest
+    config:
+      max_cpus: 1
+      max_memory: 1024
+
+platform-tools:
+  type: aliyun
+  aliyun:
+    access_key: 
+    secret_key: 
+    region: 
+
+mysql:
+  host:
+  port:
+  user:
+  password:
+  db:
+
+redis:
+  host:
+  port:
+  password:
+  db:

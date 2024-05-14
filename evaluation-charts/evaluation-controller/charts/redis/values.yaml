@@ -1,0 +1,113 @@
+# Default values for redis.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+global:
+  podAntiAffinityLabelSelector: []
+  podAntiAffinityTermLabelSelector: []
+  podAffinityLabelSelector: []
+  podAffinityTermLabelSelector: []
+  nodeAffinityLabelSelector: []
+  nodeAffinityTermLabelSelector: []
+
+replicas: 1
+
+image:
+  repository: redis
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: 7.2.4
+
+timezone: "Asia/Shanghai"
+hostNetwork: "false"
+dnsPolicy: ClusterFirst
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+password: "{{ $.Values.global.redis.password }}"
+db: "{{ $.Values.global.redis.db }}"
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+  
+readinessProbe:
+  tcpSocket:
+    port: 6379
+  failureThreshold: 6
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  successThreshold: 1
+
+livenessProbe:
+  failureThreshold: 6
+  initialDelaySeconds: 15
+  periodSeconds: 20
+  successThreshold: 1
+  tcpSocket:
+    port: 6379
+  timeoutSeconds: 1
+
+chmodContainer:
+  enabled: true
+securityContext: {}
+
+externalRedis:
+  enabled: false
+  hostIP: 192.168.1.1
+  port: 6379
+
+service:
+  ## Configuration for Clickhouse service
+  ##
+  annotations: {}
+  labels: {}
+  clusterIP: ""
+
+  ## Port for Clickhouse Service to listen on
+  ##
+
+  ports:
+  - name: tcp
+    port: 6379
+    targetPort: 6379
+    nodePort: 
+    protocol: TCP
+  ## Additional ports to open for server service
+  additionalPorts: []
+
+  externalIPs: []
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+
+  ## Denotes if this Service desires to route external traffic to node-local or cluster-wide endpoints
+  ## must be Local
+  externalTrafficPolicy: Cluster
+
+  ## Service type
+  ##
+  type: ClusterIP
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+podAntiAffinityLabelSelector: []
+podAntiAffinityTermLabelSelector: []
+podAffinityLabelSelector: []
+podAffinityTermLabelSelector: []
+nodeAffinityLabelSelector: []
+nodeAffinityTermLabelSelector: []
+

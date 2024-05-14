@@ -1,0 +1,89 @@
+replicas: 1
+
+image:
+  repository: hub.deepflow.yunshan.net/public/eval-runner
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+hostNetwork: "false"
+dnsPolicy: ClusterFirst
+restartPolicy: Never
+nameservers: 
+- 114.114.114.114
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+
+runnerConfig:
+  runner_data_dir:
+  listen_port:
+  case_params:
+    uuid: 
+    case_name: 
+    process_num: 1 
+  agent-tools:
+    type: deepflow
+    deepflow:
+      # agent_type: k8s / workload
+      agent_type: k8s
+      k8s_type_params:
+        vpc_name: "infrastructure"
+        domain_name: "aliyun"
+      server_ip: "10.1.19.32"
+      server_ssh_port: 22
+      server_ssh_username: root
+      server_ssh_password: Yunshan3302!
+      version: latest
+      config:
+        max_cpus: 1
+        max_memory: 1024
+  platform-tools:
+    type: aliyun
+    aliyun:
+      access_key: 
+      secret_key: 
+      region:
+  mysql:
+    host: 
+    port: 
+    user: 
+    password: 
+    db: 
+  redis:
+    host:
+    port:
+    password:
+    db:
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
