@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/deepflowio/deepflow-auto-test/app-traffic/client"
-	"github.com/deepflowio/deepflow-auto-test/app-traffic/client/grpc"
-	"github.com/deepflowio/deepflow-auto-test/app-traffic/client/http"
-	"github.com/deepflowio/deepflow-auto-test/app-traffic/client/mongo"
-	"github.com/deepflowio/deepflow-auto-test/app-traffic/client/mysql"
-	"github.com/deepflowio/deepflow-auto-test/app-traffic/client/redis"
-	"github.com/deepflowio/deepflow-auto-test/app-traffic/common"
+	"github.com/deepflowio/df-evaluation/eval-bench/client"
+	"github.com/deepflowio/df-evaluation/eval-bench/client/grpc"
+	"github.com/deepflowio/df-evaluation/eval-bench/client/http"
+	"github.com/deepflowio/df-evaluation/eval-bench/client/mongo"
+	"github.com/deepflowio/df-evaluation/eval-bench/client/mysql"
+	"github.com/deepflowio/df-evaluation/eval-bench/client/redis"
+	"github.com/deepflowio/df-evaluation/eval-bench/common"
 	"go.uber.org/ratelimit"
 )
 
