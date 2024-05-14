@@ -1,4 +1,4 @@
-module github.com/deepflowio/deepflow-auto-test/app-traffic
+module github.com/deepflowio/df-evaluation/eval-bench
 
 go 1.20
 

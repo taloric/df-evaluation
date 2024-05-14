@@ -26,9 +26,8 @@ import (
 	"log"
 	"net"
 
+	pb "github.com/deepflowio/df-evaluation/eval-bench/client/grpc/pb"
 	"google.golang.org/grpc"
-	pb "github.com/deepflowio/deepflow-auto-test/app-traffic/client/grpc/pb"
-
 )
 
 var (
@@ -43,15 +42,15 @@ type server struct {
 // SayHello implements helloworld.GreeterServer
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	return &pb.HelloReply{
-		Message1: "Hello 1" + in.GetName1(),
-		Message2: "Hello 2" + in.GetName2(),
-		Message3: "Hello 3" + in.GetName3(),
-		Message4: "Hello 4" + in.GetName4(),
-		Message5: "Hello 5" + in.GetName5(),
-		Message6: "Hello 6" + in.GetName6(),
-		Message7: "Hello 7" + in.GetName7(),
-		Message8: "Hello 8" + in.GetName8(),
-		Message9: "Hello 9" + in.GetName9(),
+		Message1:  "Hello 1" + in.GetName1(),
+		Message2:  "Hello 2" + in.GetName2(),
+		Message3:  "Hello 3" + in.GetName3(),
+		Message4:  "Hello 4" + in.GetName4(),
+		Message5:  "Hello 5" + in.GetName5(),
+		Message6:  "Hello 6" + in.GetName6(),
+		Message7:  "Hello 7" + in.GetName7(),
+		Message8:  "Hello 8" + in.GetName8(),
+		Message9:  "Hello 9" + in.GetName9(),
 		Message10: "Hello 10" + in.GetName10(),
 	}, nil
 }

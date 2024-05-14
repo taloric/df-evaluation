@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/deepflowio/deepflow-auto-test/app-traffic/common"
+	"github.com/deepflowio/df-evaluation/eval-bench/common"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
