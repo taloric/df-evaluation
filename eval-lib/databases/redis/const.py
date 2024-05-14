@@ -1,0 +1,9 @@
+RUNNER_TIMEOUT = 3600 * 24
+RUNNER_KEY = "runner"
+GLOBAL_LOCK = "get_runner_info"
+
+CASE_STATUS_INIT = 'init'
+CASE_STATUS_RUNNING = 'running'
+CASE_STATUS_COMPLETED = 'completed'
+CASE_STATUS_CANCELLED = 'cancelled'
+CASE_STATUS_PAUSED = 'paused'

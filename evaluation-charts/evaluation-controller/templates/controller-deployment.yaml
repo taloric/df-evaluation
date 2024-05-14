@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "evaluation-controller.fullname" . }}-controller
+  labels:
+    {{- include "evaluation-controller.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      {{- include "evaluation-controller.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/customConfig: {{ sha256sum (print (tpl (toYaml .Values.controllerConfig) $)) }}
+      labels:
+        {{- include "evaluation-controller.selectorLabels" . | nindent 8 }}
+    spec:
+      hostNetwork: {{ tpl .Values.hostNetwork . }}
+      dnsPolicy: {{ tpl .Values.dnsPolicy . }}
+      dnsConfig:
+        nameservers:
+        {{- with .Values.nameservers }}
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      imagePullSecrets:
+        {{- with .Values.imagePullSecrets }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: evaluation-controller
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ tpl .Values.image.repository . }}:{{ tpl .Values.image.tag . }}"
+          imagePullPolicy: "{{ tpl .Values.image.pullPolicy . }}"
+          ports:
+            - name: controller
+              containerPort: 10083
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          command:
+          - "/bin/bash"
+          - "-c"
+          - |
+            source /root/venv/bin/activate && python3 -u /root/eval-controller/eval-controller.py
+
+          volumeMounts:
+          - name: controller-config
+            mountPath: /etc/eval-controller.yaml
+            subPath: eval-controller.yaml
+          - name: controller-log-volume
+            mountPath: {{ .Values.controllerConfig.log_dir }}
+          - name: controller-data-volume
+            mountPath: {{ .Values.controllerConfig.runner_data_dir }}
+      volumes:
+        - name: controller-config
+          configMap:
+            name: {{ include "evaluation-controller.fullname" . }}
+            items:
+            - key: controllerConfig
+              path: eval-controller.yaml
+        - name: controller-log-volume
+          hostPath:
+            path: {{ .Values.controllerConfig.log_dir }}
+            type: DirectoryOrCreate
+        - name: controller-data-volume
+          hostPath:
+            path: {{ .Values.controllerConfig.runner_data_dir }}
+            type: DirectoryOrCreate
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
