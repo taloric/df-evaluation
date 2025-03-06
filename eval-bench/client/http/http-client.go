@@ -121,7 +121,7 @@ func (hc *HttpClient) InitClient() {
 	}
 
 	hc.req.ContentLength = int64(hc.DataSize) // 设置请求体内容长度
-	if hc.KeepAlive{
+	if hc.KeepAlive {
 		// 执行HTTP请求，并处理响应
 		resp, err := hc.Client.Do(hc.req)
 		if err != nil {
@@ -152,9 +152,11 @@ func (hc *HttpClient) Exec() error {
 func (hc *HttpClient) Get() {
 	// set headers by Complexity
 	req, _ := http.NewRequest(hc.Method, hc.Addr, hc.reqBody)
-	for i := 0; i < hc.Complexity; i++ {
-		newUuid := uuid.NewV1().String()
-		req.Header.Set(fmt.Sprintf("token%s", newUuid), newUuid)
+	if hc.Complexity > 1 {
+		for i := 0; i < hc.Complexity; i++ {
+			newUuid := uuid.NewV1().String()
+			req.Header.Set(fmt.Sprintf("token%s", newUuid), newUuid)
+		}
 	}
 	start := time.Now()
 	resp, err := hc.Client.Do(req)

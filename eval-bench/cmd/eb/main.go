@@ -7,17 +7,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/deepflowio/df-evaluation/eval-bench/client"
-	"github.com/deepflowio/df-evaluation/eval-bench/client/grpc"
-	"github.com/deepflowio/df-evaluation/eval-bench/client/http"
-	"github.com/deepflowio/df-evaluation/eval-bench/client/mongo"
-	"github.com/deepflowio/df-evaluation/eval-bench/client/mysql"
-	"github.com/deepflowio/df-evaluation/eval-bench/client/redis"
-	"github.com/deepflowio/df-evaluation/eval-bench/common"
+	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client"
+	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/grpc"
+	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/http"
+	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/mongo"
+	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/multicast"
+	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/kafka"
+	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/mysql"
+	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/redis"
+	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/common"
 	"go.uber.org/ratelimit"
 )
 
-var SUPPORT_ENGINES = []string{"redis", "mysql", "mongo", "grpc", "h2c", "https", "http"}
+var SUPPORT_ENGINES = []string{"redis", "mysql", "mongo", "grpc", "h2c", "https", "http", "multicast", "kafka"}
 
 var (
 	fhost       = flag.String("h", "", "Target host:port")
@@ -34,11 +36,24 @@ var (
 	fdb         = flag.String("db", "", "database name, support [redis, mysql, mongo]")
 	fdataSize   = flag.Int("datasize", 1, "body size of http/http2 query")
 	fkeepalive  = flag.Bool("keepalive", true, "keepalive of each http client")
+	ftopic      = flag.String("topic", "", "kafka topic")
 )
 
-func main() {
-	flag.Parse()
+const engineTemplateCmd = `
+Template of Each Engine:
+  1. grpc: ./eb -h {host}:{port} -d {duration} -e grpc -r {rate} -t {threads}
+  2. redis: ./eb -h {host}:{port} -d {duration} -e redis -r {rate} -t {threads} -p {password} -m {method[GET, SET]} -complexity {complexity(count of keys)}
+  3. mysql: ./eb -h {host}:{port} -d {duration} -e mysql -r {rate} -t {threads} -p {password} -c {concurrent connections} -sql {sql} -datasize {body size} -complexity {complexity(len of sql)}
+  4. mongo: ./eb -h {host}:{port} -d {duration} -e mongo -r {rate} -t {threads} -p {password} -complexity {complexity(count of keys)}
+  5. http/https/h2c: ./eb -h {host}:{port} -d {duration} -e {http/https/h2c} -r {rate} -t {threads} -m {method[GET, POST]} -keepalive {keepalive[true,false]} -complexity {complexity(headers count)} -datasize {body size} `
 
+func main() {
+	// output of --help
+	flag.Usage = func() {
+		flag.PrintDefaults()
+		fmt.Println(engineTemplateCmd)
+	}
+	flag.Parse()
 	// check flag
 	if *fhost == "" {
 		log.Fatal("fhost -h should be assigned")
@@ -47,7 +62,7 @@ func main() {
 		log.Fatal("frate -r should be assigned")
 	}
 	if *fengine == "" || !strings.Contains(strings.Join(SUPPORT_ENGINES, " "), *fengine) {
-		log.Fatal(fmt.Sprintf("fengine -e should be assigned %v", SUPPORT_ENGINES))
+		log.Fatalf(fmt.Sprintf("fengine -e should be assigned %v", SUPPORT_ENGINES))
 	}
 	if *fduration == 0 {
 		log.Fatal("fduration -d should be assigned")
@@ -147,6 +162,33 @@ func main() {
 				KeepAlive:      *fkeepalive,
 				H2C:            false,
 				TLS:            true,
+			}
+		} else if *fengine == "http" {
+			engineClinet = &http.HttpClient{
+				LatencyChan:    latencyChan,
+				ErrLatencyChan: errLatencyChan,
+				Addr:           *fhost,
+				Method:         *fmethod,
+				Complexity:     *fcomplexity,
+				DataSize:       *fdataSize,
+				KeepAlive:      *fkeepalive,
+				H2C:            false,
+				TLS:            false,
+			}
+		} else if *fengine == "multicast" {
+			engineClinet = &multicast.MulticastClient{
+				LatencyChan:    latencyChan,
+				ErrLatencyChan: errLatencyChan,
+				Addr:           *fhost,
+				Complexity:     *fcomplexity,
+				DataSize:       *fdataSize,
+			}
+		} else if *fengine == "kafka" {
+			engineClinet = &kafka.KafkaClient{
+				LatencyChan:    latencyChan,
+				ErrLatencyChan: errLatencyChan,
+				Addr:           *fhost,
+				Topic:          *ftopic,
 			}
 		}
 
