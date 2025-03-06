@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	pb "github.com/deepflowio/df-evaluation/eval-bench/client/grpc/pb"
+	pb "gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/grpc/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
