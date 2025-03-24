@@ -10,9 +10,9 @@ import (
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client"
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/grpc"
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/http"
+	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/kafka"
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/mongo"
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/multicast"
-	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/kafka"
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/mysql"
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/redis"
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/common"
@@ -37,6 +37,7 @@ var (
 	fdataSize   = flag.Int("datasize", 1, "body size of http/http2 query")
 	fkeepalive  = flag.Bool("keepalive", true, "keepalive of each http client")
 	ftopic      = flag.String("topic", "", "kafka topic")
+	fbody       = flag.String("body", "", "Request body for HTTP/HTTPS requests")
 )
 
 const engineTemplateCmd = `
@@ -45,7 +46,7 @@ Template of Each Engine:
   2. redis: ./eb -h {host}:{port} -d {duration} -e redis -r {rate} -t {threads} -p {password} -m {method[GET, SET]} -complexity {complexity(count of keys)}
   3. mysql: ./eb -h {host}:{port} -d {duration} -e mysql -r {rate} -t {threads} -p {password} -c {concurrent connections} -sql {sql} -datasize {body size} -complexity {complexity(len of sql)}
   4. mongo: ./eb -h {host}:{port} -d {duration} -e mongo -r {rate} -t {threads} -p {password} -complexity {complexity(count of keys)}
-  5. http/https/h2c: ./eb -h {host}:{port} -d {duration} -e {http/https/h2c} -r {rate} -t {threads} -m {method[GET, POST]} -keepalive {keepalive[true,false]} -complexity {complexity(headers count)} -datasize {body size} `
+  5. http/https/h2c: ./eb -h {host}:{port} -d {duration} -e {http/https/h2c} -r {rate} -t {threads} -method {method[GET, POST]} -keepalive {keepalive[true,false]} -complexity {complexity(headers count)} -datasize {body size} `
 
 func main() {
 	// output of --help
@@ -162,6 +163,7 @@ func main() {
 				KeepAlive:      *fkeepalive,
 				H2C:            false,
 				TLS:            true,
+				Body:           *fbody,
 			}
 		} else if *fengine == "http" {
 			engineClinet = &http.HttpClient{
@@ -174,6 +176,7 @@ func main() {
 				KeepAlive:      *fkeepalive,
 				H2C:            false,
 				TLS:            false,
+				Body:           *fbody,
 			}
 		} else if *fengine == "multicast" {
 			engineClinet = &multicast.MulticastClient{

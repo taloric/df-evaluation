@@ -31,6 +31,7 @@ type HttpClient struct {
 	KeepAlive  bool
 	TLS        bool
 	H2C        bool
+	Body       string // 新增字段
 }
 
 func (hc *HttpClient) Property() {
@@ -42,6 +43,7 @@ func (hc *HttpClient) Property() {
 	log.Printf("KeepAlive: %t\n", hc.KeepAlive)
 	log.Printf("TLS: %t\n", hc.TLS)
 	log.Printf("H2C: %t\n", hc.H2C)
+	log.Printf("Body: %s\n", hc.Body)
 }
 
 // InitClient 初始化HttpClient。
@@ -106,7 +108,11 @@ func (hc *HttpClient) InitClient() {
 	}
 
 	// 创建请求体，其大小由hc.DataSize指定
-	hc.reqBody = io.NopCloser(bytes.NewReader(bytes.Repeat([]byte("A"), hc.DataSize)))
+	if hc.Body != "" {
+		hc.reqBody = io.NopCloser(bytes.NewReader([]byte(hc.Body)))
+	} else {
+		hc.reqBody = io.NopCloser(bytes.NewReader(bytes.Repeat([]byte("A"), hc.DataSize)))
+	}
 
 	// 创建HTTP请求
 	hc.req, err = http.NewRequest(hc.Method, hc.Addr, hc.reqBody)
@@ -119,8 +125,11 @@ func (hc *HttpClient) InitClient() {
 	for i := 0; i < hc.Complexity; i++ {
 		hc.req.Header.Set(fmt.Sprintf("token%d", i), uuid.NewV1().String())
 	}
-
-	hc.req.ContentLength = int64(hc.DataSize) // 设置请求体内容长度
+	if hc.Body != "" {
+		hc.req.ContentLength = int64(len(hc.Body))
+	} else {
+		hc.req.ContentLength = int64(hc.DataSize) // 设置请求体内容长度
+	}
 	if hc.KeepAlive {
 		// 执行HTTP请求，并处理响应
 		resp, err := hc.Client.Do(hc.req)
@@ -151,7 +160,13 @@ func (hc *HttpClient) Exec() error {
 
 func (hc *HttpClient) Get() {
 	// set headers by Complexity
-	req, _ := http.NewRequest(hc.Method, hc.Addr, hc.reqBody)
+	var reqBody io.Reader
+	if hc.Body != "" {
+		reqBody = bytes.NewReader([]byte(hc.Body))
+	} else {
+		reqBody = bytes.NewReader(bytes.Repeat([]byte("A"), hc.DataSize))
+	}
+	req, _ := http.NewRequest(hc.Method, hc.Addr, reqBody)
 	if hc.Complexity > 1 {
 		for i := 0; i < hc.Complexity; i++ {
 			newUuid := uuid.NewV1().String()
