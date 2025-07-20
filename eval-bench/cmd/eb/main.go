@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client"
+	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/dubbo"
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/grpc"
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/http"
 	"gitlab.yunshan.net/yunshan/evaluation/eval-bench/client/kafka"
@@ -19,7 +20,7 @@ import (
 	"go.uber.org/ratelimit"
 )
 
-var SUPPORT_ENGINES = []string{"redis", "mysql", "mongo", "grpc", "h2c", "https", "http", "multicast", "kafka"}
+var SUPPORT_ENGINES = []string{"redis", "mysql", "mongo", "grpc", "h2c", "https", "http", "multicast", "kafka", "dubbo"}
 
 var (
 	fhost       = flag.String("h", "", "Target host:port")
@@ -46,7 +47,9 @@ Template of Each Engine:
   2. redis: ./eb -h {host}:{port} -d {duration} -e redis -r {rate} -t {threads} -p {password} -m {method[GET, SET]} -complexity {complexity(count of keys)}
   3. mysql: ./eb -h {host}:{port} -d {duration} -e mysql -r {rate} -t {threads} -p {password} -c {concurrent connections} -sql {sql} -datasize {body size} -complexity {complexity(len of sql)}
   4. mongo: ./eb -h {host}:{port} -d {duration} -e mongo -r {rate} -t {threads} -p {password} -complexity {complexity(count of keys)}
-  5. http/https/h2c: ./eb -h {host}:{port} -d {duration} -e {http/https/h2c} -r {rate} -t {threads} -method {method[GET, POST]} -keepalive {keepalive[true,false]} -complexity {complexity(headers count)} -datasize {body size} `
+  5. http/https/h2c: ./eb -h {host}:{port} -d {duration} -e {http/https/h2c} -r {rate} -t {threads} -method {method[GET, POST]} -keepalive {keepalive[true,false]} -complexity {complexity(headers count)} -datasize {body size} 
+  6. dubbo: ./eb -h {host}:{port} -d {duration} -e dubbo -r {rate} -t {threads}
+`
 
 func main() {
 	// output of --help
@@ -192,6 +195,12 @@ func main() {
 				ErrLatencyChan: errLatencyChan,
 				Addr:           *fhost,
 				Topic:          *ftopic,
+			}
+		} else if *fengine == "dubbo" {
+			engineClinet = &dubbo.DubboClient{
+				LatencyChan:    latencyChan,
+				ErrLatencyChan: errLatencyChan,
+				Addr:           *fhost,
 			}
 		}
 
